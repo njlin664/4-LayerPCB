@@ -11,6 +11,10 @@ Project Logs*/
 # Project Outputs
 Project Outputs*/
 
+# Ignore Altium CAMtastic documents and automatic reports
+*.Cam
+*.rpt
+
 # Auto-conversion notices
 *.PcbDoc.htm
 
