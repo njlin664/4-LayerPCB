@@ -58,20 +58,37 @@ I did the full design myself, start to finish. That covers the schematic (Teensy
 
 ```mermaid
 flowchart LR
-    PWR[+5V Power Input] --> REG[3.3V Rail]
-    PWR --> CAN
-    REG --> MCU[Teensy 4.0]
-    MCU <-->|I2C| TEMP[Temperature Sensor]
-    MCU <-->|TX/RX| CAN[CAN Transceiver]
-    CAN <--> BUS[External CAN Bus]
-    SIG[Noisy Analog Input] --> LPF[Active Low-Pass Filter]
-    LPF --> MCU
-    HALL[Hall-Effect Sensor] --> PFET[P-Channel MOSFET High-Side Switch]
-    PFET --> LOAD[LED Load]
-    MCU --- PAY[Payload Header: UART / SPI / I2C]
+    PWR["+5V Power Input"]
+    T["Teensy 4.0<br/>(onboard 3.3 V regulator)"]
+    R33["3.3 V Rail"]
+    HALL["Hall-Effect Sensor"]
+    MOS["P-Channel MOSFET<br/>High-Side Switch"]
+    LED["LED Load"]
+    NOISE["Noisy Analog Input"]
+    LPF["Active Low-Pass Filter"]
+    TEMP["Temperature Sensor"]
+    PAY["Payload Header:<br/>UART / SPI / I2C"]
+    CAN["CAN Transceiver"]
+    BUS["External CAN Bus"]
+
+    PWR -.->|"VIN"| T
+    T -.->|"3.3 V out"| R33
+    PWR -.-> MOS
+    PWR -.-> LPF
+    PWR -.->|"VCC"| CAN
+    R33 -.-> HALL
+    R33 -.-> TEMP
+    R33 -.->|"VIO"| CAN
+
+    HALL --> MOS --> LED
+    NOISE --> LPF -->|"analog"| T
+    T <-->|"I2C / ALERT"| TEMP
+    T <-->|"UART / SPI / I2C"| PAY
+    T <-->|"TX / RX"| CAN
+    CAN <--> BUS
 ```
 
-> ✏️ FILL IN: Replace or supplement the diagram above with your own high-level diagram if you made one, and confirm how the 3.3 V rail is generated on your board (Teensy onboard regulator or another source) so the diagram is accurate.
+Solid arrows are signals and dashed arrows are power. The 3.3 V rail comes from the Teensy 4.0's onboard regulator: +5 V from the power connector goes into the Teensy's VIN pin, and the Teensy's 3.3 V pin is the +3V3 rail. That rail powers the temperature sensor, the hall-effect sensor, the CAN transceiver's VIO pin, and the I2C pull-ups. There is no separate regulator on the board. The Teensy's 3.3 V output is limited to about 250 mA, and these loads draw only a few milliamps.
 
 ---
 <p align="center">
