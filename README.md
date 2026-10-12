@@ -108,9 +108,15 @@ Non-inverting, unity-gain op-amp filter that passes a **1 kHz** sine wave and re
 | Topology | First-order active low-pass (unity-gain buffer) |
 | Cutoff frequency | ≈ 4.13 kHz |
 | Resistor / capacitor values | R = 8.2 kΩ, C = 4.7 nF |
-| Attenuation at 15 kHz | ≈ -11.5 dB (calculated) |
+| Simulated attenuation at 15 kHz | -11.5 dB (LTspice) |
 
-**How I picked the values:** I put the cutoff at about 4 kHz, roughly the geometric midpoint between the 1 kHz signal and the 15 kHz noise. That passes 1 kHz with only about 0.25 dB of loss while cutting the 15 kHz tone as much as a first-order filter allows. fc = 1 / (2π · 8.2 kΩ · 4.7 nF). Both values are standard parts from the ARVP component library. The op-amp is a unity-gain buffer so the next stage doesn't load the RC network.
+**How I picked the values:** I put the cutoff at about 4.1 kHz, close to the geometric mean of the 1 kHz signal and the 15 kHz noise (√(1 kHz × 15 kHz) ≈ 3.9 kHz). That keeps the 1 kHz signal within about 0.25 dB while pulling the 15 kHz noise down about 11.5 dB. Moving the cutoff lower would cut more noise but start eating into the signal, and a first-order filter can't do better on both, so a second-order filter is the natural next step. R = 8.2 kΩ and C = 4.7 nF come from the ARVP component library, and fc = 1 / (2π · 8.2 kΩ · 4.7 nF) ≈ 4.13 kHz. The op-amp is a unity-gain buffer so the Teensy's ADC input doesn't load the RC network.
+
+![LTspice test circuit for the low-pass filter](docs/images/lpf_ltspice_schematic.png)
+
+![AC sweep of the low-pass filter](docs/images/lpf_ac_sweep.png)
+
+*LTspice AC sweep of the filter's RC stage (R = 8.2 kΩ, C = 4.7 nF). Cursors read -0.25 dB at 1 kHz and -11.5 dB at 15 kHz. Calculated cutoff is fc = 1 / (2π · 8.2 kΩ · 4.7 nF) ≈ 4.13 kHz. The op-amp is a unity-gain buffer, so I simulated the RC stage alone with an ideal source.*
 
 ### 5. Hall-Effect Load Switch: DRV5033 + BSS84 P-MOSFET
 A hall-effect sensor with an open-drain output controls a p-channel MOSFET used as a **high-side switch**. When a magnet is near the sensor, its output pulls low, the MOSFET turns on, and the LED lights. When the magnet is removed, the output goes high-impedance, a pull-up resistor turns the MOSFET off, and the LED goes dark. This is the same principle as ARVP's magnetic kill switch.
