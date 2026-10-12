@@ -78,34 +78,48 @@ flowchart LR
 ### 1. Microcontroller: Teensy 4.0
 Plug-in system-on-module that handles control, communication, and ADC sampling. Pin assignments were chosen from the Teensy pinout to match each peripheral's required function (I2C, CAN TX/RX, ADC, SPI, UART).
 
-✏️ FILL IN: Which pins you assigned to what, and why.
+**Pin assignments:** I matched each function to the Teensy pin that has the hardware peripheral for it, so nothing is bit-banged.
+- Pins 0 / 1: CAN2 RX / TX to the TCAN1042HV
+- Pins 7 / 8: UART RX / TX to the payload header
+- Pins 10-13: SPI (CS, MOSI, MISO, SCK) to the payload header
+- Pins 18 / 19: I2C SDA / SCL, shared by the temp sensor and payload header
+- Pin 17: TCN75A ALERT as a GPIO
+- Pin 16: filtered analog signal into the ADC
+
+Unused pins are marked no-connect.
 
 ### 2. I2C Temperature Sensor: TCN75A
 Digital temperature sensor on the I2C bus.
 
-✏️ FILL IN: I2C address, pull-up resistor values, and how you chose them.
+**Address and pull-ups:** A2, A1, A0 are all tied to GND, so the sensor sits at 0x48. SDA, SCL, and the open-drain ALERT output each get a 5.6 kΩ pull-up to 3.3 V. That's in the normal 4.7-10 kΩ range for 3.3 V I2C: stiff enough for clean edges at 100 kHz, weak enough that the sensor's sink current stays well under its limit. A 0.1 µF cap sits on VDD.
 
 ### 3. CAN Bus: TCAN1042HV transceiver
 Gives the Teensy CAN communication over a differential CAN-H / CAN-L pair on a 2-pin header. The transceiver's **VIO pin** is used to level-shift the RXD/TXD lines so the Teensy only sees 3.3 V logic while the transceiver runs from 5 V.
 
-✏️ FILL IN: Termination approach, how you read the datasheet to set up VIO, anything you verified.
+**Termination:** None on this board. J3 only breaks out CAN H / CAN L, so it's a node on the bus, and the 120 Ω terminators go at the two physical ends of the bus.
+
+**VIO:** VCC (pin 3) runs from 5 V and VIO (pin 5) from the Teensy's 3.3 V, so TXD / RXD logic is 3.3 V and the Teensy never sees 5 V on its pins. STB is tied to GND to keep the transceiver in normal mode. Decoupling is 0.1 µF on VIO and 0.1 µF + 4.7 µF on VCC.
 
 ### 4. Active Low-Pass Filter: LMV321 op-amp
 Non-inverting, unity-gain op-amp filter that passes a **1 kHz** sine wave and rejects **15 kHz** noise before the signal reaches a Teensy analog input. Input swings between 1 V and 3 V, so no negative supply is needed and the output stays inside the Teensy's 0 to 3.3 V range.
 
 | Parameter | Value |
 |---|---|
-| Topology | ✏️ FILL IN (first-order / second-order) |
-| Cutoff frequency | ✏️ FILL IN Hz |
-| Resistor / capacitor values | ✏️ FILL IN |
-| Simulated attenuation at 15 kHz | ✏️ FILL IN dB (LTSpice) |
+| Topology | First-order active low-pass (unity-gain buffer) |
+| Cutoff frequency | ≈ 4.13 kHz |
+| Resistor / capacitor values | R = 8.2 kΩ, C = 4.7 nF |
+| Attenuation at 15 kHz | ≈ -11.5 dB (calculated) |
 
-✏️ FILL IN: How you picked the cutoff and component values, and add your LTSpice plot to `docs/images/`.
+**How I picked the values:** I put the cutoff at about 4 kHz, roughly the geometric midpoint between the 1 kHz signal and the 15 kHz noise. That passes 1 kHz with only about 0.25 dB of loss while cutting the 15 kHz tone as much as a first-order filter allows. fc = 1 / (2π · 8.2 kΩ · 4.7 nF). Both values are standard parts from the ARVP component library. The op-amp is a unity-gain buffer so the next stage doesn't load the RC network.
 
 ### 5. Hall-Effect Load Switch: DRV5033 + BSS84 P-MOSFET
 A hall-effect sensor with an open-drain output controls a p-channel MOSFET used as a **high-side switch**. When a magnet is near the sensor, its output pulls low, the MOSFET turns on, and the LED lights. When the magnet is removed, the output goes high-impedance, a pull-up resistor turns the MOSFET off, and the LED goes dark. This is the same principle as ARVP's magnetic kill switch.
 
-✏️ FILL IN: Your resistor choices (pull-up, LED current limiting) and the reasoning behind them.
+**Pull-up (R1, 1 kΩ to +3V3):** The DRV5033's output is open-drain, so it can only pull the MOSFET gate low. R1 pulls the gate back up when the magnet is removed. 1 kΩ is inside the datasheet's allowed range (about 110 Ω to 32 kΩ at 3.3 V, and above 500 Ω so the output can pull close to ground), and it matches the resistor the datasheet uses for its switching-time specs. With a magnet present the sensor sinks about 3.3 mA, far below its 30 mA rating. The gate is pulled to roughly 0 V, so Vgs is about -5 V and the BSS84AK is fully on (RDS(on) ≈ 5.7 Ω typ at Vgs = -5 V).
+
+**LED current limit (R2, 2.7 kΩ):** The LED runs from +5 V through the MOSFET. The LTST-C150GKT has a forward voltage of 2.1 V typ and 2.6 V max, so the current is about (5 V - 2.1 V) / 2.7 kΩ ≈ 1.1 mA (0.9 mA at the max forward voltage). That is far below the LED's 30 mA DC rating, so it's a conservative current.
+
+**Known limitation:** Q1's source is on +5 V but R1 pulls the gate up to only 3.3 V, so in the off state Vgs is about -1.7 V. The BSS84AK's threshold is -1.1 V to -2.1 V (-1.6 V typ, measured at 250 µA), so the MOSFET is not guaranteed to turn fully off and can leak enough current to dimly light the LED. In a revision, I would tie R1 to +5 V so the off-state Vgs is 0 V. The DRV5033 allows output pull-ups up to 38 V.
 
 ### 6. Power Input and Payload Connector
 - **Power:** 2-pin Molex connector supplying +5 V.
