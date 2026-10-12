@@ -50,10 +50,6 @@ I did the full design myself, start to finish. That covers the schematic (Teensy
 | Board dimensions | 2.34 in x 1.94 in |
 | Component count | 24 |
 
-<p align="center">
-  <img src="docs/ad-4LPCB-PCB.png" alt="LTspice AC sweep of the low-pass filter" width="700">
-</p>
-
 ## System Architecture
 
 ```mermaid
@@ -91,9 +87,6 @@ flowchart LR
 Solid arrows are signals and dashed arrows are power. The 3.3 V rail comes from the Teensy 4.0's onboard regulator: +5 V from the power connector goes into the Teensy's VIN pin, and the Teensy's 3.3 V pin is the +3V3 rail. That rail powers the temperature sensor, the hall-effect sensor, the CAN transceiver's VIO pin, and the I2C pull-ups. There is no separate regulator on the board. The Teensy's 3.3 V output is limited to about 250 mA, and these loads draw only a few milliamps.
 
 ---
-<p align="center">
-  <img src="docs/ad-4LPCB-schematic.png" alt="LTspice test circuit for the low-pass filter" width="700">
-</p>
 
 ## Subsystems
 
@@ -141,6 +134,8 @@ Non-inverting, unity-gain op-amp filter that passes a **1 kHz** sine wave and re
 
 <p align="center">
   <img src="docs/lpf-ltspice-schematic.png" alt="LTspice test circuit for the low-pass filter" width="350">
+  <br>
+  <em>LTspice AC analysis simulation circuit for a passive RC low-pass filter stage. Configured with 8.2kOhm and 4.7nF components to model and verify the frequency response prior to PCB integration.</em>
 </p>
 
 <p align="center">
@@ -189,15 +184,29 @@ A hall-effect sensor with an open-drain output controls a p-channel MOSFET used 
 
 ### Images
 
-> ✏️ FILL IN: Export these from Altium and drop them in `docs/images/`, then uncomment the lines below.
+<p align="center">
+  <img src="docs/ad-4LPCB-schematic.png" alt="4LPCB-schematic.png" width="700">
+  <br>
+  <em> PCB schematic designed in Altium Designer. Integrates a Teensy 4.0, CAN bus transceiver, active low-pass filtering, and modular payload interfaces for hardware applications.</em>
+</p>
 
-<!--
-![Schematic](docs/images/schematic.png)
-![PCB Layout - Top](docs/images/pcb_top.png)
-![PCB Layout - Bottom](docs/images/pcb_bottom.png)
-![3D Render](docs/images/3d_render.png)
-![Filter Simulation](docs/images/ltspice_filter.png)
--->
+<p align="center">
+  <img src="docs/ad-4LPCB-TopLayer.png" alt="4LPCB-TopLayer.png" width="700">
+  <br>
+  <em> Top layer PCB layout routing designed in Altium Designer. Features compact component placement, signal-isolated trace routing, and structured grouping around the central Teensy 4.0 footprint.</em>
+</p>
+
+<p align="center">
+  <img src="docs/ad-4LPCB-BottomLayer.png" alt="4LPCB-BottomLayer.png" width="700">
+  <br>
+  <em> Bottom layer trace routing layout designed in Altium Designer. Presents strategic via placement and clean signal routing for high-speed SPI and I2C lines to minimize crosstalk and layer transitions.</em>
+</p>
+
+<p align="center">
+  <img src="docs/ad-4LPCB-3DRender.png" alt="4LPCB-3DRender.png" width="700">
+  <br>
+  <em> 3D mechanical model visualization rendered in Altium Designer. Showcases physical component clearances, socketed Teensy 4.0 integration, and connector layout for enclosure fit and assembly verification.</em>
+</p>
 
 ---
 
