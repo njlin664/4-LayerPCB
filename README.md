@@ -177,10 +177,17 @@ A hall-effect sensor with an open-drain output controls a p-channel MOSFET used 
 - Bottom-layer signals routed over a +3.3 V pour so the reference plane matches the signal's voltage
 - Ground connections via down to the layer 2 plane
 
-✏️ FILL IN: Any rules you added or deviated from, and why.
+**Deviations from the onboarding guide:**
+- I placed components and routed traces as close together as the manufacturer allows, using a minimum clearance of 0 mm, to keep the board compact.
+- Copper pours connect to pads with Direct Connect (no thermal relief), which favors low impedance over ease of hand-soldering.
 
 ### Layout Approach
-✏️ FILL IN: How you placed components (Teensy first, then grouping by voltage and signal flow), where you put the analog filter relative to noisy digital sections, and where decoupling capacitors sit.
+I placed the Teensy first, centered left-to-right and oriented vertically so its two pin rows face the left and right edges. Then I built each circuit around the Teensy pins it connects to, so the traces stay short:
+
+- **Left side (digital interfaces):** The CAN transceiver (U1) and its connector (J1) sit beside the Teensy's pins 0 and 1 in the top-left corner. The payload header (J2) is at the lower left, beside the UART and SPI pins (7-12). The hall sensor, MOSFET, and LED block sits between them. It doesn't use any Teensy pins, so I put it in the free space on that side.
+- **Right side (power, analog, sensing):** The 5 V power connector (J3) is at the top right, next to the Teensy's VIN pin. The analog filter (U4) and its input header (J4) are below it. The temperature sensor (U5) and its pull-ups (R3-R5) are at the lower right, beside the I2C pins (18-19) and ALERT (17).
+- **Analog vs. digital:** The filter is on the opposite side of the Teensy from the CAN transceiver and the payload header, so the width of the Teensy separates it from the busiest digital interfaces.
+- **Decoupling:** Each IC has its capacitors directly beside it, to keep the high-frequency current loop short.
 
 ### Images
 
