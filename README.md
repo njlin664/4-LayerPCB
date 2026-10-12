@@ -221,11 +221,10 @@ I placed the Teensy first, centered left-to-right and oriented vertically so its
 
 | Check | Result |
 |---|---|
-| Schematic ERC | ✏️ FILL IN (errors / warnings) |
-| PCB DRC | ✏️ FILL IN (violations; note any ignored items such as solder mask slivers and why) |
-| LTSpice filter simulation | ✏️ FILL IN |
-| Design review | ✏️ FILL IN (who reviewed, what feedback you got, what you changed) |
-| Physical testing | ✏️ FILL IN, or write "Not fabricated" if that's the case. Don't claim results you don't have. |
+| Schematic ERC | 0 errors, 0 warnings (Altium Validate, final schematic) |
+| PCB DRC | 0 violations except 26 Minimum Solder Mask Sliver items, which I ignored per the onboarding guide (they flag narrow mask between closely spaced pads). Run against the final rules. |
+| LTSpice filter simulation | AC sweep of the RC stage (8.2 kΩ, 4.7 nF): -0.25 dB at 1 kHz, -11.5 dB at 15 kHz. Calculated fc ≈ 4.13 kHz. The op-amp is treated as an ideal unity-gain buffer. |
+| Design review | Design reviewed by Pritish Gupta (Electrical Co-lead). Changes include: via placement, circuit trace resizing, and clearance adjustments |
 
 ---
 
