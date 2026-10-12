@@ -51,10 +51,6 @@ I did the full design myself, start to finish. That covers the schematic (Teensy
 | Component count | 24 |
 
 <p align="center">
-  <img src="docs/ad-4LPCB-schematic.png" alt="LTspice test circuit for the low-pass filter" width="700">
-</p>
-
-<p align="center">
   <img src="docs/ad-4LPCB-PCB.png" alt="LTspice AC sweep of the low-pass filter" width="700">
 </p>
 
@@ -78,6 +74,9 @@ flowchart LR
 > ✏️ FILL IN: Replace or supplement the diagram above with your own high-level diagram if you made one, and confirm how the 3.3 V rail is generated on your board (Teensy onboard regulator or another source) so the diagram is accurate.
 
 ---
+<p align="center">
+  <img src="docs/ad-4LPCB-schematic.png" alt="LTspice test circuit for the low-pass filter" width="700">
+</p>
 
 ## Subsystems
 
