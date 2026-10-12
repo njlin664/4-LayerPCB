@@ -50,7 +50,13 @@ I did the full design myself, start to finish. That covers the schematic (Teensy
 | Board dimensions | 2.34 in x 1.94 in |
 | Component count | 24 |
 
----
+<p align="center">
+  <img src="docs/ad-4LPCB-schematic.png" alt="LTspice test circuit for the low-pass filter" width="700">
+</p>
+
+<p align="center">
+  <img src="docs/ad-4LPCB-PCB.png" alt="LTspice AC sweep of the low-pass filter" width="700">
+</p>
 
 ## System Architecture
 
