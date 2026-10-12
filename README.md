@@ -232,39 +232,29 @@ I placed the Teensy first, centered left-to-right and oriented vertically so its
 
 > ✏️ FILL IN: This is the section employers read most closely. Pick 2-4 real problems. For each one, use the structure below. Specific beats impressive.
 
-### Challenge 1: ✏️ FILL IN (short title)
-- **Problem:** What went wrong or what was hard?
-- **Why it mattered:** What would have happened if you got it wrong?
-- **What I tried:** Including things that didn't work.
-- **Solution:** What you ended up doing and why it worked.
-- **What I'd do differently:**
+### Challenge 1: Making datasheet numbers decide the circuit
 
-### Challenge 2: ✏️ FILL IN
-- **Problem:**
-- **Why it mattered:**
-- **What I tried:**
-- **Solution:**
-- **What I'd do differently:**
+- **Problem:** Datasheets list dozens of parameters, and the hard part was knowing which ones decide the design. The hall-sensor switch was the test: a DRV5033 open-drain output drives a BSS84AK P-MOSFET's gate, so I had to work out the pull-up resistor and the gate voltage instead of copying a reference circuit.
+- **Why it mattered:** This circuit is the basis of ARVP's magnetic kill switch. If the MOSFET doesn't fully turn off when the magnet is removed, the load never fully turns off.
+- **What I tried:** I used the DRV5033 datasheet to size R1 (the allowed range is Vref / 30 mA to Vref / 100 µA, and above 500 Ω, so 1 kΩ works at 3.3 V) and to confirm the output can be pulled up to a different supply than VCC. Then I compared my gate voltage against the BSS84AK's threshold table.
+- **Solution:** The comparison exposed a problem. R1 pulls the gate to 3.3 V, but the MOSFET's source is on 5 V, so the off-state Vgs is about -1.7 V. The BSS84AK's threshold is -1.1 V to -2.1 V (-1.6 V typical), so fully off isn't guaranteed and the LED can glow dimly. I kept R1 on 3.3 V for this revision and documented the limitation here instead of hiding it.
+- **What I'd do differently:** Tie R1 to +5 V (the DRV5033 allows pull-ups up to 38 V) so the off-state Vgs is 0 V. I'd also check gate-drive voltage against the MOSFET's threshold table at the schematic stage, before layout.
 
-### Challenge 3: ✏️ FILL IN
-- **Problem:**
-- **Why it mattered:**
-- **What I tried:**
-- **Solution:**
-- **What I'd do differently:**
+### Challenge 2: Routing signals across the Teensy footprint
 
-<details>
-<summary>Prompts if you're stuck</summary>
+- **Problem:** The Teensy 4.0 is a large through-hole module in the middle of the board, with pins on both sides. Several signals had to cross it: the payload header (J2) is on the left, while the I2C pins (SDA, SCL) and SCK are on the right.
+- **Why it mattered:** Through-hole pins pass through every layer, so the module blocks routing on all four. Long detours around it add trace length and noise, and a trace that crosses a gap in its reference plane loses its return path.
+- **What I tried:** Routing around the outside of the module on the top layer with the minimum lenght of trace used. Routing through the module with smaller traces.
+- **Solution:** I routed those signals on the bottom layer, between the Teensy's two pin rows, and used vias to return to the top layer at each end. That kept them short and out of the way of the top-layer routing.
+- **What I'd do differently:** Map which Teensy pins each connector's signals use before placing anything, then put each connector on the same side as its pins so fewer signals have to cross the module.
 
-- Level shifting between 5 V and 3.3 V logic
-- Choosing filter component values from the ARVP library
-- Keeping signal return paths clean on a 4-layer stack
-- Routing around the Teensy footprint
-- Fixing DRC violations without breaking clearance rules
-- Reading datasheets for pin functions and application circuits
-- Learning Altium with no prior experience
+### Challenge 3: Getting a DRC pass that means something
 
-</details>
+- **Problem:** I had two rule problems. I set silk-to-silk and silk-to-solder-mask clearance to 0 mm, which switched off the check that would catch overlapping designators (R1 and R2 ran together). Separately, I'd entered the guide's trace-width and via values in mils instead of millimeters, so the width rule actually read Min = 0.005 mm.
+- **Why it mattered:** DRC is the last check before manufacturing. A pass against weakened rules gives false confidence, and I'd have shipped overlapping labels and unenforced width limits without knowing.
+- **What I tried:** With the silk rules at 0 mm, DRC showed only the 26 solder mask slivers. When I restored the guide's 0.254 mm values, it surfaced 6 real violations (4 silk-to-solder-mask, 2 silk-to-silk).
+- **Solution:** I moved the silkscreen text instead of loosening rules, re-entered the width and via rules with explicit mm units, and re-ran DRC. [Final result: only the 26 solder mask slivers remain, which the guide allows to ignore.]
+- **What I'd do differently:** Keep the guide's rule values from the start and leave them alone. I'd also read the rule text printed in the DRC report (the Min=0.005 mm line was visible the whole time) and run DRC after each stage of placement and routing instead of at the end.
 
 ---
 
