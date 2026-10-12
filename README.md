@@ -277,8 +277,6 @@ I placed the Teensy first, centered left-to-right and oriented vertically so its
 
 ## Repository Structure
 
-> ✏️ FILL IN: Adjust to match what you actually upload.
-
 ```
 .
 ├── README.md
