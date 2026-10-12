@@ -110,13 +110,22 @@ Non-inverting, unity-gain op-amp filter that passes a **1 kHz** sine wave and re
 | Resistor / capacitor values | R = 8.2 kΩ, C = 4.7 nF |
 | Simulated attenuation at 15 kHz | -11.5 dB (LTspice) |
 
-**How I picked the values:** I put the cutoff at about 4.1 kHz, close to the geometric mean of the 1 kHz signal and the 15 kHz noise (√(1 kHz × 15 kHz) ≈ 3.9 kHz). That keeps the 1 kHz signal within about 0.25 dB while pulling the 15 kHz noise down about 11.5 dB. Moving the cutoff lower would cut more noise but start eating into the signal, and a first-order filter can't do better on both, so a second-order filter is the natural next step. R = 8.2 kΩ and C = 4.7 nF come from the ARVP component library, and fc = 1 / (2π · 8.2 kΩ · 4.7 nF) ≈ 4.13 kHz. The op-amp is a unity-gain buffer so the Teensy's ADC input doesn't load the RC network.
+**How I picked the values:**
+- **Cutoff:** about 4.1 kHz, close to the geometric mean of the 1 kHz signal and the 15 kHz noise (√(1 kHz × 15 kHz) ≈ 3.9 kHz).
+- **Result:** the 1 kHz signal stays within about 0.25 dB and the 15 kHz noise drops about 11.5 dB.
+- **Trade-off:** a lower cutoff cuts more noise but starts eating into the signal. A first-order filter can't do better on both, so second-order is the natural next step.
+- **Values:** R = 8.2 kΩ and C = 4.7 nF from the ARVP component library. fc = 1 / (2π · 8.2 kΩ · 4.7 nF) ≈ 4.13 kHz.
+- **Op-amp:** a unity-gain buffer, so the Teensy's ADC input doesn't load the RC network.
 
-![LTspice test circuit for the low-pass filter](https://github.com/njlin664/4-LayerPCB/blob/main/docs/LTspice%20test%20circuit%20for%20the%20low-pass%20filter.png)
+<p align="center">
+  <img src="docs/lpf-ltspice-schematic.png" alt="LTspice test circuit for the low-pass filter" width="350">
+</p>
 
-![AC sweep of the low-pass filter](https://github.com/njlin664/4-LayerPCB/blob/main/docs/AC%20sweep%20of%20the%20low-pass%20filter.png)
-
-*LTspice AC sweep of the filter's RC stage (R = 8.2 kΩ, C = 4.7 nF). Cursors read -0.25 dB at 1 kHz and -11.5 dB at 15 kHz. Calculated cutoff is fc = 1 / (2π · 8.2 kΩ · 4.7 nF) ≈ 4.13 kHz. The op-amp is a unity-gain buffer, so I simulated the RC stage alone with an ideal source.*
+<p align="center">
+  <img src="docs/lpf-ac-sweep.png" alt="LTspice AC sweep of the low-pass filter" width="900">
+  <br>
+  <em>LTspice AC sweep of the filter's RC stage (R = 8.2 kΩ, C = 4.7 nF). Cursors read -0.25 dB at 1 kHz and -11.5 dB at 15 kHz. The op-amp is a unity-gain buffer, so I simulated the RC stage alone with an ideal source.</em>
+</p>
 
 ### 5. Hall-Effect Load Switch: DRV5033 + BSS84 P-MOSFET
 A hall-effect sensor with an open-drain output controls a p-channel MOSFET used as a **high-side switch**. When a magnet is near the sensor, its output pulls low, the MOSFET turns on, and the LED lights. When the magnet is removed, the output goes high-impedance, a pull-up resistor turns the MOSFET off, and the LED goes dark. This is the same principle as ARVP's magnetic kill switch.
