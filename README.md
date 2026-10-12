@@ -112,9 +112,9 @@ Non-inverting, unity-gain op-amp filter that passes a **1 kHz** sine wave and re
 
 **How I picked the values:** I put the cutoff at about 4.1 kHz, close to the geometric mean of the 1 kHz signal and the 15 kHz noise (√(1 kHz × 15 kHz) ≈ 3.9 kHz). That keeps the 1 kHz signal within about 0.25 dB while pulling the 15 kHz noise down about 11.5 dB. Moving the cutoff lower would cut more noise but start eating into the signal, and a first-order filter can't do better on both, so a second-order filter is the natural next step. R = 8.2 kΩ and C = 4.7 nF come from the ARVP component library, and fc = 1 / (2π · 8.2 kΩ · 4.7 nF) ≈ 4.13 kHz. The op-amp is a unity-gain buffer so the Teensy's ADC input doesn't load the RC network.
 
-![LTspice test circuit for the low-pass filter](docs/LTspice test circuit for the low-pass filter.png)
+![LTspice test circuit for the low-pass filter](https://github.com/njlin664/4-LayerPCB/blob/main/docs/LTspice%20test%20circuit%20for%20the%20low-pass%20filter.png)
 
-![AC sweep of the low-pass filter](docs/AC sweep of the low-pass filter.png)
+![AC sweep of the low-pass filter](https://github.com/njlin664/4-LayerPCB/blob/main/docs/AC%20sweep%20of%20the%20low-pass%20filter.png)
 
 *LTspice AC sweep of the filter's RC stage (R = 8.2 kΩ, C = 4.7 nF). Cursors read -0.25 dB at 1 kHz and -11.5 dB at 15 kHz. Calculated cutoff is fc = 1 / (2π · 8.2 kΩ · 4.7 nF) ≈ 4.13 kHz. The op-amp is a unity-gain buffer, so I simulated the RC stage alone with an ideal source.*
 
