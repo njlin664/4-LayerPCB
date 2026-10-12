@@ -2,8 +2,6 @@
 
 A 4-layer mixed-signal PCB designed end to end in **Altium Designer**, from schematic capture through layout, routing, and design rule checks. Built as part of my onboarding with the **University of Alberta Autonomous Robotic Vehicle Project (ARVP)**, where the same circuit blocks are used on the team's underwater robot.
 
-> **Fill-in guide:** anything marked `✏️ FILL IN` needs your own words or numbers. Delete the prompt text once you've written your response. Delete this note before publishing.
-
 ---
 
 ## Table of Contents
@@ -230,8 +228,6 @@ I placed the Teensy first, centered left-to-right and oriented vertically so its
 
 ## Challenges and How I Approached Them
 
-> ✏️ FILL IN: This is the section employers read most closely. Pick 2-4 real problems. For each one, use the structure below. Specific beats impressive.
-
 ### Challenge 1: Making datasheet numbers decide the circuit
 
 - **Problem:** Datasheets list dozens of parameters, and the hard part was knowing which ones decide the design. The hall-sensor switch was the test: a DRV5033 open-drain output drives a BSS84AK P-MOSFET's gate, so I had to work out the pull-up resistor and the gate voltage instead of copying a reference circuit.
@@ -260,13 +256,22 @@ I placed the Teensy first, centered left-to-right and oriented vertically so its
 
 ## Key Takeaways
 
-✏️ FILL IN: 3-5 bullets on what you learned technically and professionally. Example directions: reading datasheets, why stackup and reference planes matter, documenting as you work, getting feedback from design reviews.
+- **Check the numbers, not just the topology.** Comparing the MOSFET's gate voltage against the BSS84AK's threshold table showed that my hall-sensor switch isn't guaranteed to turn fully off (the gate is pulled to 3.3 V while the source sits at 5 V). I wouldn't have caught that by copying a reference circuit.
+- **A passing check is only as good as its rules.** I entered the width and via rules in the wrong units, and I had silkscreen clearance set to 0 mm, which hid overlapping labels. A clean DRC against weakened rules proves nothing, so I now read the rule text in the report, not just the violation count.
+- **Calculate first, then simulate.** I derived the filter's cutoff by hand (≈4.13 kHz) and confirmed it in LTspice (-0.25 dB at 1 kHz, -11.5 dB at 15 kHz). Matching numbers from two independent methods gave me confidence in the design.
+- **Reference planes shape the layout.** The guide's stackup puts signals on the outer layers over ground and a +3.3 V pour, so a signal always has a return path directly beneath it. That affected where I routed things and where I could change layers.
+- **Design review catches what you can't see yourself.** Pritish's feedback led to changes in via placement, routing, and clearances that I hadn't spotted on my own.
 
 ---
 
 ## Future Improvements
 
-✏️ FILL IN: What you'd change on a second revision. Ideas to react to, keep only what's true for you: add test points, add reverse-polarity or overcurrent protection, add ESD protection on external connectors, improve filter order, add status LEDs, tighten board outline, fabricate and bring up the board.
+- **Fix the hall-switch gate drive.** Move R1's pull-up from +3V3 to +5V so the MOSFET's off-state Vgs is 0 V and the LED goes fully dark.
+- **Add test points** on +5V, +3V3, GND, the filter output, and the CAN lines. The board has none, so debugging would mean probing small pads.
+- **Add reverse-polarity protection** on the 5 V input. J1 feeds the Teensy's VIN directly, so a swapped connector would hit it with reverse voltage.
+- **Add ESD protection** on the external connectors (J1 to J4), starting with the CAN lines.
+- **Upgrade the filter to second order.** A Sallen-Key design at the same cutoff should attenuate 15 kHz by about 22 dB (calculated), compared to 11.5 dB now.
+- **Add an optional 120 Ω CAN termination** with a jumper, so the board can sit at the end of a bus as well as in the middle.
 
 ---
 
@@ -280,13 +285,13 @@ I placed the Teensy first, centered left-to-right and oriented vertically so its
 ├── hardware/
 │   ├── schematic/        # Altium schematic files / PDF export
 │   ├── pcb/              # Altium PCB files
+├── production/
 │   ├── gerbers/          # Manufacturing outputs (if generated)
 │   └── bom/              # Bill of materials
 ├── simulation/
 │   └── lowpass_filter.asc   # LTSpice files
 └── docs/
-    ├── images/
-    └── design_notes.md
+    └── images/
 ```
 
 ---
@@ -303,7 +308,7 @@ I placed the Teensy first, centered left-to-right and oriented vertically so its
 ## Acknowledgments
 
 - **University of Alberta ARVP** electrical team for the onboarding program and design reviews
-- ✏️ FILL IN: Name anyone who reviewed your work, if they're fine with being named
+- Pritish Gupta ARVP Electrical Co-lead for giving feedback on the design process
 
 *This is a personal portfolio project built during ARVP onboarding. It is not an official ARVP release, and ARVP names and logos belong to the team.*
 
