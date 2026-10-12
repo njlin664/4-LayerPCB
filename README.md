@@ -29,10 +29,10 @@ A 4-layer mixed-signal PCB designed end to end in **Altium Designer**, from sche
 This board integrates four circuit domains around a Teensy 4.0 microcontroller: digital communication (CAN bus), I2C sensing, analog signal conditioning, and magnetically triggered high-side load switching. Each block mirrors a subsystem used in ARVP's robot (control board, sonar board, and the magnetic kill switch).
 
 **Why this project:**
-✏️ FILL IN: 2-3 sentences on why you took this on and what you wanted to get out of it (e.g. learn a professional PCB workflow, get hands-on with 4-layer design, prepare for joining ARVP's electrical team).
+I took on ARVP’s electrical onboarding project because I wanted to learn how a real PCB gets designed, not just how circuits work on paper. Going from schematic to a manufacturable 4-layer board in Altium, the same workflow ARVP uses on its robots, was the best way to get there. It was also the requirement for joining the electrical team, which I wanted anyway.
 
 **My role:**
-✏️ FILL IN: Be specific about what you personally did (schematic, layout, routing, simulation, documentation, reviews). If any part was guided by the team's reference material, say so.
+I did the full design myself, start to finish. That covers the schematic (Teensy 4.0, CAN bus transceiver, I2C temperature sensor, hall-effect-triggered high-side load switch, active low-pass filter, power input, and payload connector), the 4-layer PCB layout and routing, and the design rule and electrical checks. I also simulated the filter in LTspice, did the silkscreen, and kept design documentation along the way. The team gave me a high-level block diagram, a component library, and tutorials to follow, so the system requirements and part selection came from them. The pin mapping, filter values, placement, routing, and fixing every DRC/ERC error were on me.
 
 ---
 
@@ -47,9 +47,8 @@ This board integrates four circuit domains around a Teensy 4.0 microcontroller: 
 | Logic level | 3.3 V (Teensy pins are not 5 V tolerant) |
 | Communication | CAN bus, I2C, plus UART/SPI/I2C payload header |
 | Analog | Active low-pass filter into Teensy ADC |
-| Board dimensions | ✏️ FILL IN (mm x mm) |
-| Component count | ✏️ FILL IN |
-| Status | ✏️ FILL IN (e.g. design reviewed, fabricated, assembled, tested) |
+| Board dimensions | 2.34 in x 1.94 in |
+| Component count | 24 |
 
 ---
 
