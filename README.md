@@ -30,7 +30,7 @@ This board integrates four circuit domains around a Teensy 4.0 microcontroller: 
 I took on ARVP’s electrical onboarding project because I wanted to learn how a real PCB gets designed, not just how circuits work on paper. Going from schematic to a manufacturable 4-layer board in Altium, the same workflow ARVP uses on its robots, was the best way to get there. It was also the requirement for joining the electrical team, which I wanted anyway.
 
 **My role:**
-I did the full design myself, start to finish. That covers the schematic (Teensy 4.0, CAN bus transceiver, I2C temperature sensor, hall-effect-triggered high-side load switch, active low-pass filter, power input, and payload connector), the 4-layer PCB layout and routing, and the design rule and electrical checks. I also simulated the filter in LTspice, did the silkscreen, and kept design documentation along the way. The team gave me a high-level block diagram, a component library, and tutorials to follow, so the system requirements and part selection came from them. The pin mapping, filter values, placement, routing, and fixing every DRC/ERC error were on me.
+I did the full design myself, start to finish. That covers the schematic (Teensy 4.0, CAN bus transceiver, I2C temperature sensor, hall-effect-triggered high-side load switch, active low-pass filter, power input, and payload connector), the 4-layer PCB layout and routing, and the design rule and electrical checks. I also simulated the filter in LTspice, did the silkscreen, and kept design documentation along the way. The team gave me a high-level block diagram, a component library, and datasheets, so the system requirements and part selection came from them. The pin mapping, filter values, placement, routing, and fixing every DRC/ERC error were on me.
 
 ---
 
@@ -145,7 +145,7 @@ Non-inverting, unity-gain op-amp filter that passes a **1 kHz** sine wave and re
 ### 5. Hall-Effect Load Switch: DRV5033 + BSS84 P-MOSFET
 A hall-effect sensor with an open-drain output controls a p-channel MOSFET used as a **high-side switch**. When a magnet is near the sensor, its output pulls low, the MOSFET turns on, and the LED lights. When the magnet is removed, the output goes high-impedance, a pull-up resistor turns the MOSFET off, and the LED goes dark. This is the same principle as ARVP's magnetic kill switch.
 
-**Pull-up (R1, 1 kΩ to +3V3):** The DRV5033's output is open-drain, so it can only pull the MOSFET gate low. R1 pulls the gate back up when the magnet is removed. 1 kΩ is inside the datasheet's allowed range (about 110 Ω to 32 kΩ at 3.3 V, and above 500 Ω so the output can pull close to ground), and it matches the resistor the datasheet uses for its switching-time specs. With a magnet present the sensor sinks about 3.3 mA, far below its 30 mA rating. The gate is pulled to roughly 0 V, so Vgs is about -5 V and the BSS84AK is fully on (RDS(on) ≈ 5.7 Ω typ at Vgs = -5 V).
+**Pull-up (R1, 1 kΩ to +3V3):** The DRV5033's output is open-drain, so it can only pull the MOSFET gate low. R1 pulls the gate back up when the magnet is removed. 1 kΩ is inside the datasheet's allowed range (about 110 Ω to 32 kΩ at 3.3 V, and above 500 Ω so the output can pull close to ground), and it matches the resistor the datasheet uses for its switching-time specs. With a magnet present the sensor sinks about 3.3 mA, far below its 30 mA rating.
 
 **LED current limit (R2, 2.7 kΩ):** The LED runs from +5 V through the MOSFET. The LTST-C150GKT has a forward voltage of 2.1 V typ and 2.6 V max, so the current is about (5 V - 2.1 V) / 2.7 kΩ ≈ 1.1 mA (0.9 mA at the max forward voltage). That is far below the LED's 30 mA DC rating, so it's a conservative current.
 
@@ -240,7 +240,7 @@ I placed the Teensy first, centered left-to-right and oriented vertically so its
 
 - **Problem:** The Teensy 4.0 is a large through-hole module in the middle of the board, with pins on both sides. Several signals had to cross it: the payload header (J2) is on the left, while the I2C pins (SDA, SCL) and SCK are on the right.
 - **Why it mattered:** Through-hole pins pass through every layer, so the module blocks routing on all four. Long detours around it add trace length and noise, and a trace that crosses a gap in its reference plane loses its return path.
-- **What I tried:** Routing around the outside of the module on the top layer with the minimum lenght of trace used. Routing through the module with smaller traces.
+- **What I tried:** Routing through the module with tighter traces. Routing through the bottom layer without vias.
 - **Solution:** I routed those signals on the bottom layer, between the Teensy's two pin rows, and used vias to return to the top layer at each end. That kept them short and out of the way of the top-layer routing.
 - **What I'd do differently:** Map which Teensy pins each connector's signals use before placing anything, then put each connector on the same side as its pins so fewer signals have to cross the module.
 
@@ -257,9 +257,9 @@ I placed the Teensy first, centered left-to-right and oriented vertically so its
 ## Key Takeaways
 
 - **Check the numbers, not just the topology.** Comparing the MOSFET's gate voltage against the BSS84AK's threshold table showed that my hall-sensor switch isn't guaranteed to turn fully off (the gate is pulled to 3.3 V while the source sits at 5 V). I wouldn't have caught that by copying a reference circuit.
-- **A passing check is only as good as its rules.** I entered the width and via rules in the wrong units, and I had silkscreen clearance set to 0 mm, which hid overlapping labels. A clean DRC against weakened rules proves nothing, so I now read the rule text in the report, not just the violation count.
+- **A passing check is only as good as its rules.** I had silkscreen clearance set to 0 mm, which hid overlapping labels. A clean DRC against weakened rules proves nothing, so I now read the rule text in the report, not just the violation count.
 - **Calculate first, then simulate.** I derived the filter's cutoff by hand (≈4.13 kHz) and confirmed it in LTspice (-0.25 dB at 1 kHz, -11.5 dB at 15 kHz). Matching numbers from two independent methods gave me confidence in the design.
-- **Reference planes shape the layout.** The guide's stackup puts signals on the outer layers over ground and a +3.3 V pour, so a signal always has a return path directly beneath it. That affected where I routed things and where I could change layers.
+- **Reference planes shape the layout.** The guide's stackup puts signals on the outer layers over ground and a pours, so a signal always has a return path directly beneath it. That affected where I routed things and where I could change layers.
 - **Design review catches what you can't see yourself.** Pritish's feedback led to changes in via placement, routing, and clearances that I hadn't spotted on my own.
 
 ---
