@@ -258,7 +258,6 @@ I placed the Teensy first, centered left-to-right and oriented vertically so its
 
 - **Check the numbers, not just the topology.** Comparing the MOSFET's gate voltage against the BSS84AK's threshold table showed that my hall-sensor switch isn't guaranteed to turn fully off (the gate is pulled to 3.3 V while the source sits at 5 V). I wouldn't have caught that by copying a reference circuit.
 - **A passing check is only as good as its rules.** I had silkscreen clearance set to 0 mm, which hid overlapping labels. A clean DRC against weakened rules proves nothing, so I now read the rule text in the report, not just the violation count.
-- **Calculate first, then simulate.** I derived the filter's cutoff by hand (≈4.13 kHz) and confirmed it in LTspice (-0.25 dB at 1 kHz, -11.5 dB at 15 kHz). Matching numbers from two independent methods gave me confidence in the design.
 - **Reference planes shape the layout.** The guide's stackup puts signals on the outer layers over ground and a pours, so a signal always has a return path directly beneath it. That affected where I routed things and where I could change layers.
 - **Design review catches what you can't see yourself.** Pritish's feedback led to changes in via placement, routing, and clearances that I hadn't spotted on my own.
 
